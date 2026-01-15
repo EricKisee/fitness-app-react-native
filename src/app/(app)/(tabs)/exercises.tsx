@@ -1,9 +1,37 @@
-import { Text, SafeAreaView, View, TextInput, Touchable, TouchableOpacity } from 'react-native'
+import { Text, SafeAreaView, View, TextInput, TouchableOpacity, FlatList, RefreshControl } from 'react-native'
 import React from 'react'
 import { Ionicons } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
+import { defineQuery } from 'groq'
+import { client } from '@/lib/sanity/client'
+import { Exercise } from '@/lib/sanity/types'
+
+export const exercisesQuery = defineQuery(`*[_type == "exercise" && isActive == true]{
+  ...
+}`)
+
 
 export default function Exercises() {
   const [searchQuery, setSearchQuery] = React.useState('')
+  const [refreshing, setRefreshing] = React.useState(false)
+  const [exercises, setExercises] = React.useState<Exercise[]>([])
+  const [filteredExercises, setFilteredExercises] = React.useState([])
+  const router = useRouter()
+  const fetchExercises = async () => {
+    // Fetch exercises from Sanity or your backend
+    try {
+      const exercises = await client.fetch(exercisesQuery)
+      setExercises(exercises)
+      setFilteredExercises(exercises)
+    } catch (error) {
+      console.error('Error fetching exercises:', error)
+    }
+  }
+  const onRefresh = async () => {
+    setRefreshing(true)
+    await fetchExercises()
+    setRefreshing(false)
+  }
   return (
     <SafeAreaView className='flex-1 bg-gray-50'>
       {/* Header */}
@@ -32,6 +60,41 @@ export default function Exercises() {
           }
         </View>
       </View>
+
+      {/* Exercises List */}
+      <FlatList
+        data={[]}
+        keyExtractor={(item) => item._id}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{padding: 20}}
+        renderItem={({item}) => (
+          <ExerciseCard
+            item={item}
+            onPress={() => router.push(`/exercise-detail?id=${item.id}`)}
+          />
+        )}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#3B82F6']} //Android refresh indicator color
+            tintColor='#3B82F6' //iOS refresh indicator color
+            title='Pull to refresh exercises' //iOS refresh indicator title
+          /> 
+        }
+        ListEmptyComponent={
+          <View className='bg-white rounded-2xl p-8 items-center'>
+            <Ionicons name='fitness-outline' size={64} color='#9CA3AF' />
+            <Text className='text-gray-600 text-center mt-2'>
+              {searchQuery 
+                ? 'No exercises found matching your search.' 
+                : 'No exercises available. Please add new exercises.'
+              }
+            </Text>
+          </View>
+        }
+       />
+
     </SafeAreaView>
   )
 }
