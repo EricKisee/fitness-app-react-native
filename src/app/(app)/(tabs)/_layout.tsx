@@ -24,7 +24,7 @@ function Layout() {
             headerShown:false, 
             title:'Workout',
             tabBarIcon: ({ color, size }) => (
-                <AntDesign name='pluscircle' size={size} color={color} /> 
+                <AntDesign name='pluscircleo' size={size} color={color} /> 
             )
             }}/>
         <Tabs.Screen name='active-workout' options={{
