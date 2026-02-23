@@ -1,10 +1,11 @@
 import { Text, SafeAreaView, View, TextInput, TouchableOpacity, FlatList, RefreshControl } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { defineQuery } from 'groq'
 import { client } from '@/lib/sanity/client'
 import { Exercise } from '@/lib/sanity/types'
+import ExerciseCard from '@/app/components/ExerciseCard'
 
 export const exercisesQuery = defineQuery(`*[_type == "exercise" && isActive == true]{
   ...
@@ -27,6 +28,18 @@ export default function Exercises() {
       console.error('Error fetching exercises:', error)
     }
   }
+
+  useEffect(()=> {
+    fetchExercises()
+  }, [])
+
+  useEffect(() => {
+    const filtered = exercises.filter((exercise:Exercise) =>
+      exercise.name.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+    setFilteredExercises(filtered)
+  }, [searchQuery, exercises])
+
   const onRefresh = async () => {
     setRefreshing(true)
     await fetchExercises()
@@ -63,7 +76,7 @@ export default function Exercises() {
 
       {/* Exercises List */}
       <FlatList
-        data={[]}
+        data={filteredExercises}
         keyExtractor={(item) => item._id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{padding: 20}}

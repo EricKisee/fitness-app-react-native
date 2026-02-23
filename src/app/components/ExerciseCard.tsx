@@ -1,5 +1,7 @@
+import { urlFor } from '@/lib/sanity/client';
 import { Exercise } from '@/lib/sanity/types';
-import { View, Text } from 'react-native'
+import React from 'react';
+import { View, TouchableOpacity, Image } from 'react-native'
 
 const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -35,8 +37,21 @@ interface ExerciseCardProps {
 
 export default function ExerciseCard({ item, onPress, showChevron=false }: ExerciseCardProps) {
   return (
-    <View>
-      <Text>ExerciseCard</Text>
+    <TouchableOpacity onPress={onPress} className='bg-white rounded-2xl mb-4 shadow-sm border border-gray-100'>
+      <View className='flex-row p-6'>
+        <View className = 'w-20 h-20 bg-white rounded-xl mr-4 overflow-hidden'>
+            {
+                item.image && item.image?.asset?._ref ? (
+                    <Image
+                      source = {{ uri: urlFor(item.image.asset._ref).url()}}
+                      className='w-full h-full'
+                      resizeMode='contain'
+                    />
+                )
+                : null
+            }
+        </View>
     </View>
+    </TouchableOpacity>
   )
-}
+} 
