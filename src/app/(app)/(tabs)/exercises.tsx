@@ -83,7 +83,7 @@ export default function Exercises() {
         renderItem={({item}) => (
           <ExerciseCard
             item={item}
-            onPress={() => router.push(`/exercise-detail?id=${item.id}`)}
+            onPress={() => router.push(`/exercise-detail?id=${item._id}`)}
           />
         )}
         refreshControl={
